@@ -49,5 +49,5 @@ for file in logfile:
             srcip = jlist[1].decode('utf-8')
 
         # Collected items are compiled and output to the console.
-        print("{},{},{},{}".format(str(stime), srcip, dstip, str(dstcountry)))
+        print("{},{},{},{}".format(stime, srcip, dstip, dstcountry))
 
