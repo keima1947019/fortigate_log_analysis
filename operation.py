@@ -35,16 +35,15 @@ for file in logfile:
               jlist = item.split(b'=')
               epochtime = int(jlist[1].decode('utf-8'))
               dt = datetime.fromtimestamp(epochtime // 1000000000)
-              stime = dt.strftime('%Y-%m-%d %H:%M:%S')
+              sdate = dt.strftime('%Y/%m/%d')
+              stime = dt.strftime('%H:%M:%S')
               stime += '.' + str(int(epochtime % 1000000000)).zfill(9)
-              #print(stime,end='\t')
-  
+
             # Get the dst ip.
             if b'dstip' in item:
               jlist = item.split(b'=')
               dstip = jlist[1].decode('utf-8')
-              #print(type(dstip))
-  
+
             # Get the dst ip.
             if b'srcip' in item:
               jlist = item.split(b'=')
@@ -59,5 +58,5 @@ for file in logfile:
           continue
 
         # Collected items are compiled and output to the console.
-        print("{},{},{},{},{}".format(stime, srcip, dstip, dstport, dstcountry))
+        print("{},{},{},{},{},{}".format(sdate, stime, srcip, dstip, dstport, dstcountry))
 
