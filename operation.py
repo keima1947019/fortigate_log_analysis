@@ -7,7 +7,7 @@ logfile = glob.glob(b'fw/*.log.tar.gz')
 
 # Print the header
 print('# Firewall traffic log that contains socialist state, communist nation, Authoritarian political states, and so on.')
-print('# DateTime(nanosecond), src-ip, dst-ip, dst-port, dst-country')
+print('# Date, Time(nanosecond), src-ip, dst-ip, dst-port, dst-country')
 
 # Read the globbed log files one by one.
 for file in logfile:
