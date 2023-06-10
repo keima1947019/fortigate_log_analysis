@@ -1,10 +1,10 @@
-import math
+from tqdm import tqdm
 import gzip
 import glob
 import re
 from datetime import datetime
 from decimal import Decimal
-logfile = glob.glob(b'fw/*.log.tar.gz')
+fortigatelogarchive = glob.glob(b'fw/*.log.tar.gz')
 socialist_count = 0
 democratic_count = 0
 sdate = 0
@@ -15,21 +15,25 @@ i = 0
 #print('# Date, Time(nanosecond), src-ip, dst-ip, dst-port, dst-country')
 
 # Read the globbed log files one by one.
-for file in logfile:
+for file in fortigatelogarchive:
+#for file in tqdm(fortigatelogarchive):
 
   with gzip.open(file, 'rb') as f:
     # Get the total number of lines.
     tnol = sum(1 for line in f) - 1
+    bar = tqdm(total = int(tnol))
 
   # Read one compressed file
   with gzip.open(file, 'rb') as f:
 
     # Read one line.
     for line in f:
+    #for line in tqdm(f,leave=False):
       
       # Print the state of progress
       rnol = tnol - i
       i += 1
+      bar.update(1)
 
       # If the string "type=traffic" is included, process it.
       if b'type="traffic"' in line:
@@ -43,6 +47,7 @@ for file in logfile:
           dstcountry = mlist[1].decode('utf-8')
 
           for item in slist:
+          #for item in tqdm(slist,leave=False):
 
             # Get event date and time from log.
             if b'eventtime' in item:
@@ -69,11 +74,12 @@ for file in logfile:
               dstport = jlist[1].decode('utf-8')
             
             # Progress indication
-            print("There are {} % more cases left.".format(math.floor( rnol / tnol * 100 )))
+            #print("{:.2f}%".format(percentage),end=' ')
         
         else:
           
           for item in slist:
+          #for item in tqdm(slist,leave=False):
             if b'eventtime' in item:
               jlist = item.split(b'=')
               epochtime = int(jlist[1].decode('utf-8'))
@@ -85,7 +91,8 @@ for file in logfile:
               #print("Democratic : {} {} {}".format(democratic_count,sdate,stime))
               
               # Progress indication
-              print("There are {} % more cases left.".format(math.floor( rnol / tnol * 100 )))
+              percentage = rnol / tnol * 100
+              #print("{:.2f}%".format(percentage))
               
             continue
           continue
@@ -95,13 +102,7 @@ for file in logfile:
         #print("socialist : {}".format(socialist_count))
 
 # Print statistics
-print('# Total access count of communicate to democratic state')
-print(democratic_count)
-print('# The democratic percentage of all communications')
-percentage = (democratic_count / (democratic_count + socialist_count)) * 100
-print(percentage, ' %')
-print('# Total access count of communicate to socialist state')
-print(socialist_count)
-print('# The socialist percentage of all communications')
-percentage = (socialist_count / (democratic_count + socialist_count)) * 100
-print(percentage, ' %')
+print("Democratic state access counts : {:,}".format(democratic_count))
+print("Democratic access percentage : {:.3f}%".format((democratic_count / (democratic_count + socialist_count)) * 100))
+print("Socialist state access counts : {:,}".format(socialist_count))
+print("Socialist access percentage : {:.3f}%".format((socialist_count / (democratic_count + socialist_count)) * 100))
