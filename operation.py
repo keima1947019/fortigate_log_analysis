@@ -9,6 +9,10 @@ socialist_count = 0
 democratic_count = 0
 sdate = 0
 i = 0
+srcip = None
+dstip = None
+dstport = None
+dstcountry = None
 
 # Read the globbed log files one by one.
 for file in fortigatelogarchive:
@@ -81,6 +85,19 @@ for file in fortigatelogarchive:
               jlist = item.split(b'=')
               dstport = jlist[1].decode('utf-8')
             
+            # Write collected items.
+            if (
+              srcip != None
+              and dstip != None
+              and dstport != None
+              and dstcountry != None
+            ):
+              outfile.write("{},{},{},{},{},{}\n".format(sdate, stime, srcip, dstip, dstport, dstcountry))
+              srcip = None
+              dstip = None
+              dstport = None
+              dstcountry = None
+            
         else: # Democratic state
           for item in slist:
             if b'eventtime' in item:
@@ -91,11 +108,6 @@ for file in fortigatelogarchive:
               stime = dt.strftime('%H:%M:%S')
               stime += '.' + str(int(epochtime % 1000000000)).zfill(9)
               democratic_count += 1
-              #print("Democratic : {} {} {}".format(democratic_count,sdate,stime))
-          continue
-
-        # Collected items are compiled and output to the console.
-        outfile.write("{},{},{},{},{},{}\n".format(sdate, stime, srcip, dstip, dstport, dstcountry))
 
 # Statistics
 outfile.write('\n# Statistics\n')
