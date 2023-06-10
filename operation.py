@@ -10,16 +10,22 @@ democratic_count = 0
 sdate = 0
 i = 0
 
-# Print the header
-#print('# Firewall traffic log that contains socialist state, communist nation, Authoritarian political states, and so on.')
-#print('# Date, Time(nanosecond), src-ip, dst-ip, dst-port, dst-country')
-
 # Read the globbed log files one by one.
 for file in fortigatelogarchive:
-#for file in tqdm(fortigatelogarchive):
 
+  # Make a name of output file.
+  outfilename_array = file.split(b'_')
+  outfilename = outfilename_array[0] + b'_stat.log'
+  
+  # Open the outfile
+  outfile = open(outfilename,'w')
+  
+  # Write a header
+  outfile.write('\n# Firewall traffic log that contains socialist state, communist nation, Authoritarian political states, and so on.\n')
+  outfile.write('\n# Date, Time(nanosecond), src-ip, dst-ip, dst-port, dst-country\n')
+
+  # Get the total number of lines.
   with gzip.open(file, 'rb') as f:
-    # Get the total number of lines.
     tnol = sum(1 for line in f) - 1
     bar = tqdm(total = int(tnol))
 
@@ -28,8 +34,7 @@ for file in fortigatelogarchive:
 
     # Read one line.
     for line in f:
-    #for line in tqdm(f,leave=False):
-      
+
       # Print the state of progress
       rnol = tnol - i
       i += 1
@@ -41,13 +46,16 @@ for file in fortigatelogarchive:
         slist = dcline[0].split()
         mlist = dcline[1].split(b'"')
 
-        # Split by the country name that is socialist, communism, feudalism, state.
-        if b'Russia' in mlist[1] or b'democratic' in mlist[1] or b'China' in mlist[1] or b'Cuba' in mlist[1]:
+        if ( # Socialist, Communism, Feudalism.
+          b'Russia' in mlist[1] 
+          or b'democratic' in mlist[1] 
+          or b'China' in mlist[1] 
+          or b'Cuba' in mlist[1]
+        ):
           socialist_count += 1
           dstcountry = mlist[1].decode('utf-8')
 
           for item in slist:
-          #for item in tqdm(slist,leave=False):
 
             # Get event date and time from log.
             if b'eventtime' in item:
@@ -73,13 +81,8 @@ for file in fortigatelogarchive:
               jlist = item.split(b'=')
               dstport = jlist[1].decode('utf-8')
             
-            # Progress indication
-            #print("{:.2f}%".format(percentage),end=' ')
-        
-        else:
-          
+        else: # Democratic state
           for item in slist:
-          #for item in tqdm(slist,leave=False):
             if b'eventtime' in item:
               jlist = item.split(b'=')
               epochtime = int(jlist[1].decode('utf-8'))
@@ -89,20 +92,15 @@ for file in fortigatelogarchive:
               stime += '.' + str(int(epochtime % 1000000000)).zfill(9)
               democratic_count += 1
               #print("Democratic : {} {} {}".format(democratic_count,sdate,stime))
-              
-              # Progress indication
-              percentage = rnol / tnol * 100
-              #print("{:.2f}%".format(percentage))
-              
-            continue
           continue
 
         # Collected items are compiled and output to the console.
-        #print("{},{},{},{},{},{}".format(sdate, stime, srcip, dstip, dstport, dstcountry))
-        #print("socialist : {}".format(socialist_count))
+        outfile.write("{},{},{},{},{},{}\n".format(sdate, stime, srcip, dstip, dstport, dstcountry))
 
-# Print statistics
-print("Democratic state access counts : {:,}".format(democratic_count))
-print("Democratic access percentage : {:.3f}%".format((democratic_count / (democratic_count + socialist_count)) * 100))
-print("Socialist state access counts : {:,}".format(socialist_count))
-print("Socialist access percentage : {:.3f}%".format((socialist_count / (democratic_count + socialist_count)) * 100))
+# Statistics
+outfile.write('\n# Statistics\n')
+outfile.write("Democratic state access counts : {:,}\n".format(democratic_count))
+outfile.write("Democratic access percentage : {:.3f}%\n".format((democratic_count / (democratic_count + socialist_count)) * 100))
+outfile.write("Socialist state access counts : {:,}\n".format(socialist_count))
+outfile.write("Socialist access percentage : {:.3f}%\n\n".format((socialist_count / (democratic_count + socialist_count)) * 100))
+outfile.close()
