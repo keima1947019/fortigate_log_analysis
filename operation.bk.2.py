@@ -1,4 +1,4 @@
-import math
+import pandas as pd
 import gzip
 import glob
 import re
@@ -11,25 +11,23 @@ sdate = 0
 i = 0
 
 # Print the header
-#print('# Firewall traffic log that contains socialist state, communist nation, Authoritarian political states, and so on.')
-#print('# Date, Time(nanosecond), src-ip, dst-ip, dst-port, dst-country')
+print('# Firewall traffic log that contains socialist state, communist nation, Authoritarian political states, and so on.')
+print('# Date, Time(nanosecond), src-ip, dst-ip, dst-port, dst-country')
 
 # Read the globbed log files one by one.
 for file in logfile:
 
-  with gzip.open(file, 'rb') as f:
-    # Get the total number of lines.
-    tnol = sum(1 for line in f) - 1
-
   # Read one compressed file
   with gzip.open(file, 'rb') as f:
+
+    col_names = ['c{0:02d}'.format(i) for i in range(100)]
+    dfrm = pd.read_csv(f, delim_whitespace=True, names = col_names)
+    #print(dfrm.shape[0])
 
     # Read one line.
     for line in f:
       
-      # Print the state of progress
-      rnol = tnol - i
-      i += 1
+      print(int(dfrm.shape[0]) - i)
 
       # If the string "type=traffic" is included, process it.
       if b'type="traffic"' in line:
@@ -67,9 +65,6 @@ for file in logfile:
             if b'dstport' in item:
               jlist = item.split(b'=')
               dstport = jlist[1].decode('utf-8')
-            
-            # Progress indication
-            print("There are {} % more cases left.".format(math.floor( rnol / tnol * 100 )))
         
         else:
           
@@ -82,17 +77,15 @@ for file in logfile:
               stime = dt.strftime('%H:%M:%S')
               stime += '.' + str(int(epochtime % 1000000000)).zfill(9)
               democratic_count += 1
+              i += 1
               #print("Democratic : {} {} {}".format(democratic_count,sdate,stime))
-              
-              # Progress indication
-              print("There are {} % more cases left.".format(math.floor( rnol / tnol * 100 )))
-              
             continue
           continue
 
         # Collected items are compiled and output to the console.
         #print("{},{},{},{},{},{}".format(sdate, stime, srcip, dstip, dstport, dstcountry))
-        #print("socialist : {}".format(socialist_count))
+        #print("socialist : {} !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!".format(socialist_count))
+        i += 1
 
 # Print statistics
 print('# Total access count of communicate to democratic state')
