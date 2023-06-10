@@ -22,7 +22,7 @@ for file in fortigatelogarchive:
   outfilename = outfilename_array[0] + b'_stat.log'
   
   # Open the outfile
-  outfile = open(outfilename,'w')
+  outfile = open(outfilename,'a')
   
   # Write a header
   outfile.write('\n# Firewall traffic log that contains socialist state, communist nation, Authoritarian political states, and so on.\n')
@@ -35,6 +35,7 @@ for file in fortigatelogarchive:
 
   # Read one compressed file
   with gzip.open(file, 'rb') as f:
+    print('Reading {}'.format(f))
 
     # Read one line.
     for line in f:
